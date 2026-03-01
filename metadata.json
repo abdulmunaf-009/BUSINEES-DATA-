@@ -1,0 +1,5 @@
+{
+  "name": "Al-Moiz Dental Clinic",
+  "description": "Premium Dental Care in Dubai",
+  "requestFramePermissions": ["microphone"]
+}

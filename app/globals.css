@@ -1,0 +1,98 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+  --color-primary: #00C2B8;
+  --color-emerald-deep: #043927;
+  --color-sapphire-royal: #0F2557;
+  --color-gold-accent: #C5A059;
+  --color-charcoal-black: #050505;
+  --color-charcoal-grey: #0D1117;
+  
+  --font-display: var(--font-cinzel), serif;
+  --font-sans: var(--font-montserrat), sans-serif;
+}
+
+:root {
+  --emerald-gradient: linear-gradient(180deg, #050505 0%, #043927 100%);
+  --sapphire-gradient: linear-gradient(180deg, #043927 0%, #0F2557 100%);
+  --transition-gradient: linear-gradient(180deg, #0F2557 0%, #050505 100%);
+  --gold-glow: 0 0 20px rgba(197, 160, 89, 0.4);
+}
+
+body {
+  background-color: var(--color-charcoal-black);
+  color: #e2e8f0;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+.scene {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding-top: 6rem;
+  padding-bottom: 6rem;
+}
+
+.mag-title {
+  font-family: var(--font-display);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
+
+.glass-nav {
+  background: rgba(5, 5, 5, 0.8);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(197, 160, 89, 0.1);
+}
+
+.gold-button {
+  background-color: var(--color-gold-accent);
+  color: black;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 10px;
+  padding: 1rem 2.5rem;
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+  box-shadow: var(--gold-glow);
+}
+
+.gold-button:hover {
+  transform: scale(1.05);
+}
+
+.gold-button:active {
+  transform: scale(0.95);
+}
+
+.bg-scene-1 { background: var(--emerald-gradient); }
+.bg-scene-2 { background: var(--sapphire-gradient); }
+.bg-scene-3 { background: #050505; }
+.bg-scene-4 { background: linear-gradient(180deg, #050505 0%, #043927 100%); }
+.bg-scene-5 { background: linear-gradient(180deg, #043927 0%, #0F2557 100%); }
+.bg-scene-6 { background: linear-gradient(180deg, #0F2557 0%, #050505 100%); }
+
+.content-reveal {
+  opacity: 0.9;
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 1000ms;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
