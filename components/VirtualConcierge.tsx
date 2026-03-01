@@ -666,7 +666,7 @@ SERVICES_KNOWLEDGE (DETAILED PROCESSES & PATIENT PROFILES)
             <div className="flex justify-between items-center mb-6 relative z-10">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-gold-accent" />
-                <h3 className="font-display text-lg text-white">Virtual Concierge</h3>
+                <h3 className="font-display text-lg text-white">Connect to Al Moiz Consultant</h3>
               </div>
               <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-white transition-colors">
                 <X className="w-5 h-5" />
