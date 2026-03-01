@@ -33,7 +33,7 @@ export default function VirtualConcierge() {
     shouldDisconnectRef.current = false;
     hasUserSpokenRef.current = false;
     silencePromptCountRef.current = 0;
-    
+
     try {
       const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
       if (!apiKey) throw new Error("API key is missing.");
@@ -69,7 +69,7 @@ export default function VirtualConcierge() {
           if (!isUserSpeakingRef.current && sessionRef.current && activeSourcesRef.current.length === 0) {
             try {
               silencePromptCountRef.current += 1;
-              
+
               let promptText = "";
 
               if (!hasUserSpokenRef.current) {
@@ -199,6 +199,13 @@ You respond:
 "Of course. Could you briefly share your concern or what you would like help with, so I can guide you more accurately?"
 OR
 "Which service would you like to know about, or you may share your concern so I can suggest the most suitable treatment."
+
+INTERRUPTION HANDLING (STRICT)
+If the user interrupts you while you are speaking:
+✅ STOP speaking immediately.
+✅ LISTEN fully to what the user is saying.
+✅ RESPOND directly to their new statement or question.
+❌ DO NOT continue your previous sentence.
 
 4️⃣ EDUCATION STYLE
 
@@ -379,7 +386,7 @@ SERVICES_KNOWLEDGE (DETAILED PROCESSES & PATIENT PROFILES)
           onopen: () => {
             setIsConnected(true);
             setIsConnecting(false);
-            
+
             processor.onaudioprocess = (e) => {
               const inputData = e.inputBuffer.getChannelData(0);
               let sum = 0;
@@ -408,14 +415,14 @@ SERVICES_KNOWLEDGE (DETAILED PROCESSES & PATIENT PROFILES)
               }
 
               const buffer = new Uint8Array(pcm16.buffer);
-              
+
               // Convert to base64 safely
               let binary = '';
               for (let i = 0; i < buffer.byteLength; i++) {
                 binary += String.fromCharCode(buffer[i]);
               }
               const base64 = btoa(binary);
-              
+
               sessionPromise.then((session: any) => {
                 session.sendRealtimeInput({
                   media: { data: base64, mimeType: 'audio/pcm;rate=16000' }
@@ -425,7 +432,7 @@ SERVICES_KNOWLEDGE (DETAILED PROCESSES & PATIENT PROFILES)
           },
           onmessage: (message: LiveServerMessage) => {
             console.log("Received message:", message);
-            
+
             if (message.setupComplete) {
               sessionPromise.then((session: any) => {
                 console.log("Setup complete. Sending initial greeting trigger...");
@@ -447,7 +454,7 @@ SERVICES_KNOWLEDGE (DETAILED PROCESSES & PATIENT PROFILES)
                 silenceTimerRef.current = null;
               }
               activeSourcesRef.current.forEach(s => {
-                try { s.stop(); } catch (e) {}
+                try { s.stop(); } catch (e) { }
               });
               activeSourcesRef.current = [];
               if (audioContextRef.current) {
@@ -490,40 +497,40 @@ SERVICES_KNOWLEDGE (DETAILED PROCESSES & PATIENT PROFILES)
                     });
                   } else if (call.name === "bookAppointment") {
                     console.log("Booking appointment with args:", call.args);
-                    
+
                     fetch('/api/book', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify(call.args)
                     })
-                    .then(res => res.json())
-                    .then(data => {
-                      sessionPromise.then((session: any) => {
-                        session.sendToolResponse({
-                          functionResponses: [
-                            {
-                              id: call.id,
-                              name: call.name,
-                              response: { result: "success", message: "Appointment booked successfully and confirmation email sent." }
-                            }
-                          ]
+                      .then(res => res.json())
+                      .then(data => {
+                        sessionPromise.then((session: any) => {
+                          session.sendToolResponse({
+                            functionResponses: [
+                              {
+                                id: call.id,
+                                name: call.name,
+                                response: { result: "success", message: "Appointment booked successfully and confirmation email sent." }
+                              }
+                            ]
+                          });
+                        });
+                      })
+                      .catch(err => {
+                        console.error("Error calling book API:", err);
+                        sessionPromise.then((session: any) => {
+                          session.sendToolResponse({
+                            functionResponses: [
+                              {
+                                id: call.id,
+                                name: call.name,
+                                response: { result: "error", message: "Failed to book appointment." }
+                              }
+                            ]
+                          });
                         });
                       });
-                    })
-                    .catch(err => {
-                      console.error("Error calling book API:", err);
-                      sessionPromise.then((session: any) => {
-                        session.sendToolResponse({
-                          functionResponses: [
-                            {
-                              id: call.id,
-                              name: call.name,
-                              response: { result: "error", message: "Failed to book appointment." }
-                            }
-                          ]
-                        });
-                      });
-                    });
                   }
                 }
               }
@@ -539,7 +546,7 @@ SERVICES_KNOWLEDGE (DETAILED PROCESSES & PATIENT PROFILES)
                 }
               }
             }
-            
+
             if (base64Audio && audioContextRef.current) {
               if (silenceTimerRef.current) {
                 clearTimeout(silenceTimerRef.current);
@@ -555,18 +562,18 @@ SERVICES_KNOWLEDGE (DETAILED PROCESSES & PATIENT PROFILES)
               for (let i = 0; i < pcm16.length; i++) {
                 float32[i] = pcm16[i] / 32768;
               }
-              
+
               const audioBuffer = audioContextRef.current.createBuffer(1, float32.length, 24000);
               audioBuffer.getChannelData(0).set(float32);
 
               const bufferSource = audioContextRef.current.createBufferSource();
               bufferSource.buffer = audioBuffer;
               bufferSource.connect(audioContextRef.current.destination);
-              
+
               const startTime = Math.max(nextPlayTimeRef.current, audioContextRef.current.currentTime);
               bufferSource.start(startTime);
               nextPlayTimeRef.current = startTime + audioBuffer.duration;
-              
+
               activeSourcesRef.current.push(bufferSource);
               bufferSource.onended = () => {
                 activeSourcesRef.current = activeSourcesRef.current.filter(s => s !== bufferSource);
@@ -582,7 +589,7 @@ SERVICES_KNOWLEDGE (DETAILED PROCESSES & PATIENT PROFILES)
                 }
               };
             } else if (shouldDisconnectRef.current && activeSourcesRef.current.length === 0) {
-               disconnect();
+              disconnect();
             }
           },
           onclose: () => {
@@ -608,7 +615,7 @@ SERVICES_KNOWLEDGE (DETAILED PROCESSES & PATIENT PROFILES)
 
   const disconnect = () => {
     if (sessionRef.current) {
-      try { sessionRef.current.close(); } catch (e) {}
+      try { sessionRef.current.close(); } catch (e) { }
       sessionRef.current = null;
     }
     if (processorRef.current) {
@@ -646,7 +653,7 @@ SERVICES_KNOWLEDGE (DETAILED PROCESSES & PATIENT PROFILES)
     <div className="fixed bottom-8 right-8 z-[100] flex flex-col items-end">
       <AnimatePresence>
         {isOpen && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
@@ -655,7 +662,7 @@ SERVICES_KNOWLEDGE (DETAILED PROCESSES & PATIENT PROFILES)
           >
             {/* Background Glow */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-gold-accent/10 rounded-full blur-3xl pointer-events-none" />
-            
+
             <div className="flex justify-between items-center mb-6 relative z-10">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-gold-accent" />
@@ -670,7 +677,7 @@ SERVICES_KNOWLEDGE (DETAILED PROCESSES & PATIENT PROFILES)
               {isConnected ? (
                 <>
                   <div className="relative w-24 h-24 flex items-center justify-center mb-6">
-                    <motion.div 
+                    <motion.div
                       animate={{ scale: [1, 1.2, 1] }}
                       transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                       className="absolute inset-0 bg-gold-accent/20 rounded-full blur-xl"
@@ -680,7 +687,7 @@ SERVICES_KNOWLEDGE (DETAILED PROCESSES & PATIENT PROFILES)
                     </div>
                   </div>
                   <p className="text-white font-light text-sm mb-6">Listening... Speak naturally.</p>
-                  <button 
+                  <button
                     onClick={disconnect}
                     className="flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold text-red-400 hover:text-red-300 transition-colors border border-red-400/30 hover:border-red-400/50 px-6 py-3 rounded-full"
                   >
@@ -697,7 +704,7 @@ SERVICES_KNOWLEDGE (DETAILED PROCESSES & PATIENT PROFILES)
                   <p className="text-slate-400 font-light text-sm mb-8">
                     Have a question? Speak directly with our AI concierge to learn about our services or book an appointment.
                   </p>
-                  <button 
+                  <button
                     onClick={connect}
                     className="gold-button w-full rounded-full"
                   >
@@ -713,8 +720,8 @@ SERVICES_KNOWLEDGE (DETAILED PROCESSES & PATIENT PROFILES)
         )}
       </AnimatePresence>
 
-      <button 
-        onClick={() => setIsOpen(!isOpen)} 
+      <button
+        onClick={() => setIsOpen(!isOpen)}
         className={`w-16 h-16 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(197,160,89,0.4)] hover:scale-105 transition-transform ${isOpen ? 'bg-charcoal-black border border-gold-accent/30' : 'bg-gold-accent'}`}
       >
         {isOpen ? <X className="text-gold-accent w-6 h-6" /> : <Mic className="text-black w-6 h-6" />}
