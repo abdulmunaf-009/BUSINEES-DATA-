@@ -70,10 +70,10 @@ export default function VirtualConcierge() {
         let timeoutMs: number;
         if (!hasUserSpokenRef.current) {
           // First connection timeouts
-          timeoutMs = silencePromptCountRef.current === 0 ? 5000 : 4000; // 1st: 5s, 2nd: 4s
+          timeoutMs = silencePromptCountRef.current === 0 ? 6000 : 8000; // 1st: 6s, 2nd: 8s
         } else {
           // Mid-conversation timeouts
-          timeoutMs = 7000; // Both 1st and 2nd: 7s
+          timeoutMs = 10000; // Both 1st and 2nd: 10s
         }
 
         silenceTimerRef.current = setTimeout(() => {
