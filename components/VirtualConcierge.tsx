@@ -65,6 +65,17 @@ export default function VirtualConcierge() {
 
       const startSilenceTimer = () => {
         if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+
+        // Dynamic timeout based on context
+        let timeoutMs: number;
+        if (!hasUserSpokenRef.current) {
+          // First connection timeouts
+          timeoutMs = silencePromptCountRef.current === 0 ? 5000 : 4000; // 1st: 5s, 2nd: 4s
+        } else {
+          // Mid-conversation timeouts
+          timeoutMs = 7000; // Both 1st and 2nd: 7s
+        }
+
         silenceTimerRef.current = setTimeout(() => {
           if (!isUserSpeakingRef.current && sessionRef.current && activeSourcesRef.current.length === 0) {
             try {
@@ -75,14 +86,14 @@ export default function VirtualConcierge() {
               if (!hasUserSpokenRef.current) {
                 // First time connection logic
                 if (silencePromptCountRef.current === 1) {
-                  promptText = "The user has been silent for 3-4 seconds after your initial greeting. You MUST say EXACTLY: 'Are you with me?' Do not say anything else.";
+                  promptText = "The user has been silent for about 5 seconds after your initial greeting. You MUST say EXACTLY: 'Are you with me?' Do not say anything else.";
                 } else {
                   promptText = "The user is still silent. You MUST say EXACTLY: 'It seems the connection is inactive. Please feel free to reconnect whenever convenient. Thank you — goodbye.' and then you MUST call the \`disconnectCall\` tool to end the call.";
                 }
               } else {
                 // Mid-conversation logic
                 if (silencePromptCountRef.current === 1) {
-                  promptText = "The user has been silent for 5 seconds mid-conversation. You MUST say EXACTLY: 'Are you still with me?'";
+                  promptText = "The user has been silent for about 7 seconds mid-conversation. You MUST say EXACTLY: 'Are you still with me?'";
                 } else {
                   promptText = "The user has been unresponsive for a long time. You MUST say EXACTLY: 'It seems the connection is inactive. Please reconnect anytime. Thank you — goodbye.' and then you MUST call the \`disconnectCall\` tool to end the call.";
                 }
@@ -96,7 +107,7 @@ export default function VirtualConcierge() {
               console.error("Error sending silence prompt:", e);
             }
           }
-        }, 4000);
+        }, timeoutMs);
       };
 
       const sessionPromise = ai.live.connect({
